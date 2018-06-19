@@ -1,0 +1,47 @@
+Script started on Tue 19 Jun 2018 02:08:10 AM EDT
+]0;jim@jim-TMM: ~/Desktop/github/CSCI375-SM18/project1[01;32mjim@jim-TMM[00m:[01;34m~/Desktop/github/CSCI375-SM18/project1[00m$ python prodecu[K[K[K[KduceConsumeTest.py
+What would you like the buffer size to be? enter a number: 4
+What would you like the counter Limit to be? enter a number: 19
+Produced: 318
+Produced: 291
+Produced: 86
+
+Consumed: 318
+Consumed: 291
+Consumed: 86
+Produced: 854
+Produced: 756
+Consumed: 854
+Consumed: 756
+Produced: 828
+Produced: 36
+Produced: 530
+Produced: 797
+Consumed: 828
+Consumed: 36
+Consumed: 530
+Consumed: 797
+Produced: 924
+Produced: 443
+Produced: 263
+Produced: 304
+Consumed: 924
+Produced: 23
+Consumed: 443
+Consumed: 263
+Produced: 313
+Consumed: 304
+Produced: 971
+Produced: 108
+Consumed: 23
+Produced: 436
+Consumed: 313
+Produced: 29
+Consumed: 971
+Consumed: 108
+Consumed: 436
+Consumed: 29
+]0;jim@jim-TMM: ~/Desktop/github/CSCI375-SM18/project1[01;32mjim@jim-TMM[00m:[01;34m~/Desktop/github/CSCI375-SM18/project1[00m$ exit
+exit
+
+Script done on Tue 19 Jun 2018 02:09:11 AM EDT
