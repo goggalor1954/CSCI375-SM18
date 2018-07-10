@@ -94,10 +94,20 @@ void swap(bool *a, bool *b){
 //*****i don't actually understand this one. implement it after i get binary working.
 class countingSemaphore{
 	private:
-		int lockPosition;
+		bool isAvailable;
+		int availableTime;
 	public:
 		//default construction is to set lock position to 0. i think over time this needs to increase somehow? probably goes back to 0 once it finishes running. i think.
-		countingSemaphore(){lockPosition=0;}
+		countingSemaphore(){
+			isAvailable=true;
+			availableTime=100;
+		}
+		bool getIsAvailable(){return isAvailable;}
+		void setIsAvailable(bool x){isAvailable=x;}
+		int getAvailableTime(){return availableTime;}
+		void decreaseAvailableTime(){availableTime--;}
+		// reset the availableTime to 100
+		void resetAvailableTime(){availableTime=100;}
 
 };
 
@@ -134,15 +144,85 @@ class processObject{
 		void setHasKey(bool x){hasKey=x;}
 
 };
-//checks if an array of binary semaphores. if one is available, returns the array position as a poitive integer. if not, it returns a negative number.
-int checkAvailable(binarySemaphore x[]){
-	for(int i=0; i<2; i++){
-		if (x->getIsAvailable()==true){return i;}
-	}
-	//nothing was available
-	return -1;
+
+//if there are any writers in the critical section before atempting to enter.
+void checkCriticalSection(binarySemaphore writerLock){
+	if(writerLock.getIsAvailable()==false){std::cout << "There are curently 0 writer processes in the critical section\n";}
+	else{std::cout << "There is currently 1 writer process in the critical section.\n";}
 };
 
+//checks if there are any readers in the critical section before attempting to enter.
+void checkCriticalSection(countingSemaphore readerLocks[]){
+	int total=0;
+	for(int i=0; i<3; i++){
+		if(readerLocks[i].getIsAvailable()==false){total++;}
+	}
+	std::cout << "There are curently " << total << " reader processed in the critical section\n";
+};
+
+//checks bolth critical sections at once
+void checkCriticalSection(countingSemaphore readerLocks[], binarySemaphore writerLock){
+	checkCriticalSection(readerLocks);
+	checkCriticalSection(writerLock);
+};
+
+
+
+//countingSemaphore subWait. i designed this so that it has to wait for a specific semaphore to get the signal......because signal shouls signal the one that has been waiting the longest.
+//while availableTime >0, checks if isAvailable = true. if it is, it returns true. if not, calls decreaseAvailableTime. if available time =0, resets available time and returns falce.
+bool subWait(countingSemaphore * passedSemaphore){
+	while(passedSemaphore->getAvailableTime()>0){
+		if(passedSemaphore->getIsAvailable()==true){return true;}
+		passedSemaphore->decreaseAvailableTime();
+	}
+	passedSemaphore->resetAvailableTime();
+	return false;
+};
+
+//wait for the counting semaphore. while availableTime > 0 and isAvailable is false. loop untill either isAvailable is true or availableTime =0. if availableTime =0. break. if isAvailable = true, allow set isAvailable to false and enter critical section.
+//i guess i need a way to pick a semaphore to deincrement? like maybe the first one that = 100, and then have a sub function that counts doen untill zero, if neither is 100 then just break.
+
+//countingSemaphore wait
+bool wait( countingSemaphore passedSemaphores[]){
+	//asume an array size of 2.
+	for(int i=0; i<2; i++){
+		if(passedSemaphores[i].getAvailableTime()==100){
+			return subWait(& passedSemaphores[i]);
+		}
+	}
+	return false;
+};
+
+
+
+//wait for the binarySemaphore. while the semaphores isAvailable is false, break to allow another process to enter. if it is true. change it to false, and allow the process to continue. 
+bool wait( binarySemaphore * passedSemaphore){
+	if(passedSemaphore->getIsAvailable()==false){return false;}
+	else{
+		passedSemaphore->setIsAvailable(false);
+		return true;
+	}
+};
+
+//signal for the binary semaphore, just changes the value of the one passed semaphore. 
+void signal(binarySemaphore * passedSemaphore){
+	passedSemaphore->setIsAvailable(true);
+};
+
+//signal for the countingSemaphore. compares the availableTime of both semaphores. changes isAvalable for the one that is lowest. (the one waiting the longest) 
+//i might run itno a problem here. its an array of pointers os maybe it will change it, but i'm not entirely sure.
+void signal(countingSemaphore passedSemaphore[]){
+	//assumed that the array is of size 2.
+	//im pretty sure that any process that is able to call signal will beable to signa; atleast once.  
+	
+	int oldest;
+	if(passedSemaphore[0].getAvailableTime()<=passedSemaphore[1].getAvailableTime()){oldest=0;}
+	else{oldest=1;}
+	passedSemaphore[oldest].setIsAvailable(true);
+	passedSemaphore[oldest].resetAvailableTime();
+	return;
+};
+		
 		
 
 int main(){
@@ -150,7 +230,8 @@ int main(){
 	//if array of the available processes. if this array were any larger i would have probably written a function to assign assign them.
 	processObject *avaiableProcesses[5]={new processObject(0), new processObject(0), new processObject(0), new processObject(1), new processObject(1)};
 
-	
+	//bool readerLocks[2]{true,true};
+	//bool writerLock=true;
 
 	//this if sor testing. must end eventually.
 	int maxProcesses=20;
@@ -158,7 +239,8 @@ int main(){
 	//random intilization
 	srand(time(NULL));
 
-	binarySemaphore writerLock[1];
+	binarySemaphore writerLock;
+	countingSemaphore *readerLock[2]={new countingSemaphore(), new countingSemaphore()};
 
 	while(processCount<maxProcesses){
 		switch(rand()%5){
@@ -180,8 +262,9 @@ int main(){
 			case 2:
 				break;
 			case 3:
+				if(wait(&writerLock)==false){break;}
 				/*writer process goals:
-					-break off into a thread. I think. doulbe check this. i don't know how you would do this project without that.
+					-break off into a thread. I think. doulbe check this. i don't know how you would do this project without that. no. says not to use any multithreading feature from a program matrix.
 					-check if there are any other processes in the critical section.
 					-report what those processes are. 
 					-don't enter the critical section if there are any other processes in the critical section.
