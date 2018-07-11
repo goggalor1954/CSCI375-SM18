@@ -3,76 +3,35 @@
 //Project #2
 //Due 7/10/18
 
+//!!!This program does not work!!!!
 
-/* what the fuck do i have to do to make this work.
 
-sub project1-
-    implement binary and counting semaphores
-sub project2-
-    implement swap operation.
 
-create 3 readers and 2 writers for a total of 5 processes.
+//Despite my efforts, i wwas not able to coreclty implement this program.
+//under this implementation, readers and writers are frequently in the critical section together.
+//I never got around to implementing any shared buffer
+//I think i'm doing something wrong with the semaphores? but i'm not sure.
+//all in all i'm very disapointed.
 
--up to two reader processes can be inside the critical section without any wroter processes.
--inorder for a writer process to go into the critical section, it must first check wether or there is a process int the critical section. (i assume it can't enter if there is one there)
 
--the critical section reads shared data buffer for the reader. updates shared data buffer for the wrriter process.
+/*
+program goals:
+-up to two reader processes can be inside the critical section without any writer processes.
+-inorder for a writer process to go into the critical section, it must first check wether or there is a process int the critical section.
+
+-the critical section reads shared data buffer form the reader. updates shared data buffer for the wrriter process.
 i must implemnt any shared data for readers/writers but you must clearly specify the following in output.
 
     -when reader or writer enters the critical section, it must report wheteher there are any readers/reiters other than itself.
     -(optional) may print out the data you read write when implementing the real buffer.
     -print out a "panic message" when the semaphore rules are not observed.
 
-in main, run a random number generator to choose processes ro execute. 
-chosen process starts/resumes and after one execution it returns, waits in ready queue.
 
-can be implemented using a switch statment, do not use multi-threading or mutex feature from the programming languages.
-each **process** is one switch statment. and is returned after each instruction.
 You need to keep track of program counter of each process to resume at the right place once it will be chosen to run by keeping global counter variable per process. (**i don;t entirly understand this***).
 
 
-*** i think that what i should do first is to implemtn the old rpoject in c++ first. then i'll be able to write this modified version for project 2.***
-
-maybe implement some kind of queue for the processes to go once executed?
-
-if i stick with a queue for the buffer, then ide have to be able to recursibly pop data and recreate a new queu? that dosent seam right. mabye i do need to write an array.
-
-
-ok. inorder to do anyof this, i first need to understand the data structure that i'm working with. what is the signal signaling and what is it waiting for? what is the lock and jey and where are they kept.
-so i think 3 and an aditional array of 1, for now. would be expanded if this lab called for more writers.
-
-
-new processes are randomly assigned to the ready queue. ready queue contains process objects that are either deginated as readers or writers. when conditions are possible, head of the queu is assigned to running. 
- 
-if a running process must wait for something(like another process to signal) the process goes to the waiting queue. i might make 2 waiting queus, one for readers and writers. when one recives the proper signal the top of the waiting queue goes back to the running queue.
-
-//i think he said i don't have to worry about interupts/time. because each process is only running one instruction.
-
-need to create a process object, and assigne them to be either readers or writers.
-ill make two array objects for easy implementation.
-
-never mind the queue. instructions say to run a random number generator to pick from. so i guess its just an array of 5 objects.
-
-//i think in order to implement this, i need to call the thread function in a loop and then join at the end of the loop. loop should terminate eventually.
-
-maybe do something with test and set. is that much?
-
-maybe i can do two arrays with a reader and writer lock? maybe i do the writer lock, then check if there are any available readers, and if there are i allow it to procede, and if not i unlock and quit?
-im still not sure how the semaphores get implemented here.
-i think the binary semaphores are for the writers, and the counting semaphores are for the writers. maybe i use another binary semaphore to check if the writer is prevented by readers.
-
-implement the writer first. seams simpler.
-
-use std::ref() inorder to change something across threads.
-
-**remember, join all threads before termnating the program. maybe wigure out some other wait at the end of the program to do this.
 */
 
-//this needs to be implemented with a lock and key. i guess the lock is a array pointing to the reader/writer processes. key would be tru only when available? this is going to be difficult.
-
-// i think lock the lock is automaticly set to true in the begining. the process picks it up, thats the key. when its done. it returns the key back to the lock.
-//no. i think semaphore is for notification of its waiting. 
-//each pocess should be able to lock by picking up a key
 
 
 
@@ -84,26 +43,21 @@ use std::ref() inorder to change something across threads.
 #include <thread>
 using namespace std;
 
-//swap function. swaps the boolean value of a lock(a) and key(b).
-void swap(bool *a, bool *b){
-	bool temp;
-	std::ref(*a)=*b;
-	std::ref(*b)=temp;
-}
 
-//*****i don't actually understand this one. implement it after i get binary working.
+
+
 class countingSemaphore{
 	private:
-		bool isAvailable;
+		bool keyIsAvailable;
 		int availableTime;
 	public:
 		//default construction is to set lock position to 0. i think over time this needs to increase somehow? probably goes back to 0 once it finishes running. i think.
 		countingSemaphore(){
-			isAvailable=true;
+			keyIsAvailable=true;
 			availableTime=100;
 		}
-		bool getIsAvailable(){return isAvailable;}
-		void setIsAvailable(bool x){isAvailable=x;}
+		bool getKeyIsAvailable(){return keyIsAvailable;}
+		void setKeyIsAvailable(bool x){keyIsAvailable=x;}
 		int getAvailableTime(){return availableTime;}
 		void decreaseAvailableTime(){availableTime--;}
 		// reset the availableTime to 100
@@ -114,12 +68,12 @@ class countingSemaphore{
 //simpler to implement. start here.
 class binarySemaphore{
 	private:
-		bool isAvailable;
+		bool keyIsAvailable;
 
 	public:
-		binarySemaphore(){isAvailable=true;}
-		bool getIsAvailable(){return isAvailable;}
-		void setIsAvailable(bool x){isAvailable=x;}
+		binarySemaphore(){keyIsAvailable=true;}
+		bool getKeyIsAvailable(){return keyIsAvailable;}
+		void setKeyIsAvailable(bool x){keyIsAvailable=x;}
 };
 
 
@@ -145,44 +99,238 @@ class processObject{
 
 };
 
-//if there are any writers in the critical section before atempting to enter.
-void checkCriticalSection(binarySemaphore writerLock){
-	if(writerLock.getIsAvailable()==false){std::cout << "There are curently 0 writer processes in the critical section\n";}
-	else{std::cout << "There is currently 1 writer process in the critical section.\n";}
+
+//reports if any writers in the critical section
+void checkCriticalSection(bool writerKey);
+
+//reports if any readers are in the critical section
+void checkCriticalSection(bool readerKeys[]);
+
+//reports if any writers or readers are in the critical section
+void checkCriticalSection(bool readerKeys[], bool writerKey);
+
+//subwait is used to implement the counting semaphore. while availbleTime>0, checks if keyIsAvailable from the passedSemaphore = true. if it is returns true. if time has expired it resets availbleTime and returns false.
+bool subWait(countingSemaphore * passedSemaphore);
+
+//countingSemaphore wait. checks if there any available counting semaphores(where available time =100). if not it returns false to allow another process to enter the critical section. if there are it calls subWait for that semaphore. returns the result.
+bool wait( countingSemaphore passedSemaphores[]);
+
+//binarySemaphore wait. while the semaphores keyIsAvailable is false, break to allow another process to enter critical section. if it is true. change it to false, and allow the process to continue. 
+bool wait( binarySemaphore * passedSemaphore);
+
+//signal for the binarySemaphore, changes the value of keyIsAvailable
+void signal(binarySemaphore * passedSemaphore);
+
+//signal for the countingSemaphore. compares the availableTime of both semaphores. changes the value of keyIsAvailable for the one that is lowest. (the one that has been waiting the longest) 
+//i might run itno a problem here. its an array of pointers os maybe it will change it, but i'm not entirely sure.
+void signal(countingSemaphore passedSemaphore[]);
+
+//checks to see if there are any writers in the critical section(for reader processes) if there are any in the critical section, return true. true causes the case to break. does not wait and does not change any variables. 
+//i feel like this should be modified. maybe allow it to wait endlessly untill it can enter? probably a bad idea
+bool checkForWriters(binarySemaphore * writerSemaphores);
+
+//checks to see if there are any reader in the critical section(for writer processes) if there are any in the critical section, return true. true causes the case to break. does not wait and does not change any variables
+bool checkForReaders(countingSemaphore  readerSemaphores[]);
+
+//passed the readerKeys array and processID(the current case number).checks which readerKey is available to be locked and locks it. 
+//i don't like how i implemented this. i have to check which key is available first before entering swaping it. i know that can lead to some problems but i don't know how to get around it. may need to rewrite this.
+void lock(processObject * processId, bool readerKeys[]);
+
+//passed the writerKey and processId( the current case number). locks the binarySemaphore
+void lock(bool &writerKey,processObject * processId);
+
+//passed the readerKeys array and processID(the current case number). unlocks the first available spot in the array
+void unlock(processObject * processId, bool readerKeys[]);
+
+//passed the writerKey. unlocks it
+void unlock(bool &writerKey,processObject * processId);
+
+
+
+
+
+int main(){
+
+	//if array of the available processes. if this array were any larger i would have probably written a function to assign assign them.
+	processObject *avaiableProcesses[5]={new processObject(0), new processObject(0), new processObject(0), new processObject(1), new processObject(1)};
+
+	bool *readerKeys[2]{new bool(true), new bool(true)};
+	bool writerKey=true;
+	binarySemaphore writerLock;
+	countingSemaphore *readerLock[2]={new countingSemaphore(), new countingSemaphore()};
+
+	//random intilization
+	srand(time(NULL));
+
+	//for testing purposes this programs end after 20 "processes" have been called.
+	int maxProcesses=20;
+	int processCount=0;
+
+	while(processCount<maxProcesses){
+		//case 0-2 represent reader processes. csse 3-4 represent writer processes.
+		switch(rand()%5){
+			case 0:
+				//wait untill you can enter the critical section. if no available semaphores or time expires, break
+				if(wait(*readerLock)==false){break;}
+				//check to see if thhere is a writer process in the critical section. if there is, signal the countingSemaphres, break and return to ready state to allow another process to enter the critical section.
+				if(checkForWriters(& writerLock)==true){
+					signal(*readerLock);
+					break;
+				}
+				//lock the critical section. position on availableProcesses array is the came ase case number
+				lock(avaiableProcesses[0], *readerKeys);
+				//report current processes report processes curently in critical section
+				std::cout << "reader case 0: entering critical section\n";
+				checkCriticalSection(*readerKeys, writerKey);
+				//***critical section***
+				while(avaiableProcesses[0]->getHasKey()==true){
+					//optional, do somthing with a shared buffer here
+					//***end critical section***
+					//unlock critical section
+					unlock(avaiableProcesses[0], *readerKeys);
+				}
+				//signal semaphore
+				signal(*readerLock);
+				break;
+			case 1:
+				//wait untill you can enter the critical section. if no available semaphores or time expires, break
+				if(wait(*readerLock)==false){break;}
+				//check to see if thhere is a writer process in the critical section. if there is, signal the countingSemaphres, break and return to ready state to allow another process to enter the critical section.
+				if(checkForWriters(& writerLock)==true){
+					signal(*readerLock);
+					break;
+				}
+				//lock the critical section. position on availableProcesses array is the came ase case number
+				lock(avaiableProcesses[1], *readerKeys);
+				//report current processes report processes curently in critical section
+				std::cout << "reader case 1: entering critical section\n";
+				checkCriticalSection(*readerKeys, writerKey);
+				//***critical section***
+				while(avaiableProcesses[1]->getHasKey()==true){
+					//optional, do somthing with a shared buffer here
+					//***end critical section***
+					//unlock critical section
+					unlock(avaiableProcesses[1], *readerKeys);
+				}
+				//signal semaphore
+				signal(*readerLock);
+				break;
+			case 2:
+				//wait untill you can enter the critical section. if no available semaphores or time expires, break
+				if(wait(*readerLock)==false){break;}
+				//check to see if thhere is a writer process in the critical section. if there is, signal the countingSemaphres, break and return to ready state to allow another process to enter the critical section.
+				if(checkForWriters(& writerLock)==true){
+					signal(*readerLock);
+					break;
+				}
+				//lock the critical section. position on availableProcesses array is the came ase case number
+				lock(avaiableProcesses[2], *readerKeys);
+				//report current processes report processes curently in critical section
+				std::cout << "reader case 2: entering critical section\n";
+				checkCriticalSection(*readerKeys, writerKey);
+				//***critical section***
+				while(avaiableProcesses[2]->getHasKey()==true){
+					//optional, do somthing with a shared buffer here
+					//***end critical section***
+					//unlock critical section
+					unlock(avaiableProcesses[2], *readerKeys);
+				}
+				//signal semaphore
+				signal(*readerLock);
+				break;
+			case 3:
+				//check to see if there are any readers in the critical section. if so, break. if not continue.
+				if(checkForWriters( &writerLock)==true){break;}
+				//if another writer is in the critical section, break. if not, set keyIsAvailable to false and continue
+				if(wait(&writerLock)==false){break;}
+
+				//lock the critical section
+				lock(writerKey, avaiableProcesses[3]); 
+				//report on what is in the critical section before entering.
+				std::cout << "writer case 3: entering critical section\n";
+				checkCriticalSection(*readerKeys, writerKey);
+				///***critical section ***
+				while(avaiableProcesses[3]->getHasKey()==true){
+				//do something with the buffer(optional)
+				
+
+				//***end critical section***
+				//unlock
+					unlock(writerKey, avaiableProcesses[3]); 
+				//signal
+				signal(&writerLock);
+				}
+				break;
+			case 4:
+				//check to see if there are any readers in the critical section. if so, break. if not continue.
+				if(checkForWriters( &writerLock)==true){break;}
+				//if another writer is in the critical section, break. if not, set keyIsAvailable to false and continue
+				if(wait(&writerLock)==false){break;}
+
+				//lock the critical section
+				lock(writerKey, avaiableProcesses[4]); 
+				//report on what is in the critical section before entering.
+				std::cout << "writer case 4: entering critical section\n";
+				checkCriticalSection(*readerKeys, writerKey);
+				///***critical section ***
+				while(avaiableProcesses[4]->getHasKey()==true){
+				//do something with the buffer(optional)
+				//***end critical section***
+				//unlock
+					unlock(writerKey, avaiableProcesses[4]); 
+				}
+				//signal
+				signal(&writerLock);
+
+				break;
+		}
+		processCount++;
+	}
+
+
+	return 0;
+}
+
+
+
+
+
+//checks if there are any writers in the critical section before atempting to enter.
+void checkCriticalSection(bool writerKey){
+	if(writerKey==false){std::cout << "0 writer processes in the critical section\n";}
+	else{std::cout << "1 writer process in the critical section.\n";}
 };
 
 //checks if there are any readers in the critical section before attempting to enter.
-void checkCriticalSection(countingSemaphore readerLocks[]){
+void checkCriticalSection(bool readerKeys[]){
 	int total=0;
-	for(int i=0; i<3; i++){
-		if(readerLocks[i].getIsAvailable()==false){total++;}
+	for(int i=0; i<2; i++){
+		if(readerKeys[i]==false){total++;}
 	}
-	std::cout << "There are curently " << total << " reader processed in the critical section\n";
+	std::cout << total << " reader processes in the critical section\n";
 };
 
-//checks bolth critical sections at once
-void checkCriticalSection(countingSemaphore readerLocks[], binarySemaphore writerLock){
-	checkCriticalSection(readerLocks);
-	checkCriticalSection(writerLock);
+//checks bolth if there are any writes or readers in the critical section before attemptin to enter.
+void checkCriticalSection(bool readerKeys[], bool writerKey){
+	checkCriticalSection(readerKeys);
+	checkCriticalSection(writerKey);
 };
 
 
 
-//countingSemaphore subWait. i designed this so that it has to wait for a specific semaphore to get the signal......because signal shouls signal the one that has been waiting the longest.
-//while availableTime >0, checks if isAvailable = true. if it is, it returns true. if not, calls decreaseAvailableTime. if available time =0, resets available time and returns falce.
+//subwait is used to implement the counting semaphore. while availbleTime>0, checks if keyIsAvailable from the passedSemaphore = true. if it is returns true. if time has expired it resets availbleTime and returns false.
 bool subWait(countingSemaphore * passedSemaphore){
 	while(passedSemaphore->getAvailableTime()>0){
-		if(passedSemaphore->getIsAvailable()==true){return true;}
+		if(passedSemaphore->getKeyIsAvailable()==true){return true;}
 		passedSemaphore->decreaseAvailableTime();
 	}
 	passedSemaphore->resetAvailableTime();
 	return false;
 };
 
-//wait for the counting semaphore. while availableTime > 0 and isAvailable is false. loop untill either isAvailable is true or availableTime =0. if availableTime =0. break. if isAvailable = true, allow set isAvailable to false and enter critical section.
-//i guess i need a way to pick a semaphore to deincrement? like maybe the first one that = 100, and then have a sub function that counts doen untill zero, if neither is 100 then just break.
 
-//countingSemaphore wait
+
+//countingSemaphore wait. checks if there any available counting semaphores(where available time =100). if not it returns false to allow another process to enter the critical section. if there are it calls subWait for that semaphore. returns the result.
 bool wait( countingSemaphore passedSemaphores[]){
 	//asume an array size of 2.
 	for(int i=0; i<2; i++){
@@ -195,21 +343,23 @@ bool wait( countingSemaphore passedSemaphores[]){
 
 
 
-//wait for the binarySemaphore. while the semaphores isAvailable is false, break to allow another process to enter. if it is true. change it to false, and allow the process to continue. 
+
+
+//binarySemaphore wait. while the semaphores keyIsAvailable is false, break to allow another process to enter critical section. if it is true. change it to false, and allow the process to continue. 
 bool wait( binarySemaphore * passedSemaphore){
-	if(passedSemaphore->getIsAvailable()==false){return false;}
+	if(passedSemaphore->getKeyIsAvailable()==false){return false;}
 	else{
-		passedSemaphore->setIsAvailable(false);
+		passedSemaphore->setKeyIsAvailable(false);
 		return true;
 	}
 };
 
-//signal for the binary semaphore, just changes the value of the one passed semaphore. 
+//signal for the binarySemaphore, changes the value of keyIsAvailable
 void signal(binarySemaphore * passedSemaphore){
-	passedSemaphore->setIsAvailable(true);
+	passedSemaphore->setKeyIsAvailable(true);
 };
 
-//signal for the countingSemaphore. compares the availableTime of both semaphores. changes isAvalable for the one that is lowest. (the one waiting the longest) 
+//signal for the countingSemaphore. compares the availableTime of both semaphores. changes the value of keyIsAvailable for the one that is lowest. (the one that has been waiting the longest) 
 //i might run itno a problem here. its an array of pointers os maybe it will change it, but i'm not entirely sure.
 void signal(countingSemaphore passedSemaphore[]){
 	//assumed that the array is of size 2.
@@ -218,69 +368,66 @@ void signal(countingSemaphore passedSemaphore[]){
 	int oldest;
 	if(passedSemaphore[0].getAvailableTime()<=passedSemaphore[1].getAvailableTime()){oldest=0;}
 	else{oldest=1;}
-	passedSemaphore[oldest].setIsAvailable(true);
+	passedSemaphore[oldest].setKeyIsAvailable(true);
 	passedSemaphore[oldest].resetAvailableTime();
 	return;
 };
-		
-		
 
-int main(){
+//checks to see if there are any readers in the critical section(for writer processes) if there are any in the critical section, return true. true causes the case to break. does not wait and does not change any variables
+bool checkForReaders(countingSemaphore  readerSemaphores[]){
+	for(int i=0; i<2; i++){
+		if(readerSemaphores[i].getKeyIsAvailable()==false){return true;}
+	}
+	return false;
+};
 
-	//if array of the available processes. if this array were any larger i would have probably written a function to assign assign them.
-	processObject *avaiableProcesses[5]={new processObject(0), new processObject(0), new processObject(0), new processObject(1), new processObject(1)};
 
-	//bool readerLocks[2]{true,true};
-	//bool writerLock=true;
+//checks to see if there are any writers in the critical section(for reader processes) if there are any in the critical section, return true. true causes the case to break. does not wait and does not change any variables
+bool checkForWriters(binarySemaphore * writerSemaphores){
+	if(writerSemaphores->getKeyIsAvailable()==false){return true;}
+	else{return false;}
+};
 
-	//this if sor testing. must end eventually.
-	int maxProcesses=20;
-	int processCount=0;
-	//random intilization
-	srand(time(NULL));
-
-	binarySemaphore writerLock;
-	countingSemaphore *readerLock[2]={new countingSemaphore(), new countingSemaphore()};
-
-	while(processCount<maxProcesses){
-		switch(rand()%5){
-			case 0:
-				/* reader process goals:
-					-break off into a thread. I think. doulbe check this. i don't know how you would do this project without that.
-					-check if there are any other processes in the critical section.
-					-report what those processes are. 
-					-don't enter the critical section untill if there are already atlead 2 reader processes or 1 writer processes. wait untill apropriate singal recived.( either that the writer has left or that one of the readers hasent.)
-					-lock a critical section reader with the processes key 9 i think, not sure of the implementation)  (maybe use swap)
-					-do something with the shared buffer (optional)
-					-unlock (maybe use swap)
-					-signal (unlock and signal might need to be swapped)
-					-join thread
-				*/
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				if(wait(&writerLock)==false){break;}
-				/*writer process goals:
-					-break off into a thread. I think. doulbe check this. i don't know how you would do this project without that. no. says not to use any multithreading feature from a program matrix.
-					-check if there are any other processes in the critical section.
-					-report what those processes are. 
-					-don't enter the critical section if there are any other processes in the critical section.
-					-lock a critical section reader with the processes key ( i think, not sure of the implementation) ( maybe use swap)
-					-do something with the shared buffer (optional)
-					-unlock (maybe use swap)
-					-signal (unlock and signal might need to be swapped)
-					-join thread
-				*/
-				break;
-			case 4:
-				break;
+//passed the readerKeys array and the current processObject.checks which readerKey is available to be locked and locks it. 
+//i don't like how i implemented this. i have to check which key is available first before entering swaping it. i know that can lead to some problems but i don't know how to get around it. may need to rewrite this.
+void lock(processObject * processId, bool readerKeys[]){
+	for(int i=0; i<2; i++){
+		if(readerKeys[i]==true){
+			bool temp;
+			temp=readerKeys[i];
+			readerKeys[i]=processId->getHasKey();
+			processId->setHasKey(temp);
+			return;
 		}
-		processCount++;
+	}
+};
+
+//passed the writerKey and processObject. locks the binarySemaphore
+void lock(bool & writerKey,processObject * processId){
+	bool temp;
+	temp=writerKey;
+	writerKey=processId->getHasKey();
+	processId->setHasKey(temp);
+};
+
+//passed the readerKeys array and processObject. unlocks the first available spot in the array
+void unlock(processObject * processId, bool readerKeys[]){
+	for(int i=0; i<2; i++){
+		if(readerKeys[i]==false){
+			bool temp;
+			temp=readerKeys[i];
+			readerKeys[i]=processId->getHasKey();
+			processId->setHasKey(temp);
+			return;
+		}
 	}
 
+};
 
-	return 0;
-}
+//passed the writerKey and processObject. unlocks it
+void unlock(bool &writerKey,processObject *processId){
+	bool temp;
+	temp=writerKey;
+	writerKey=processId->getHasKey();
+	processId->setHasKey(temp);
+};

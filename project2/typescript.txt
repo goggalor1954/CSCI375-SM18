@@ -1,0 +1,84 @@
+Script started on Tue 10 Jul 2018 11:20:12 PM EDT
+]0;jim@jim-TMM: ~/Desktop/github/CSCI375-SM18/project2[01;32mjim@jim-TMM[00m:[01;34m~/Desktop/github/CSCI375-SM18/project2[00m$ git pushcommit -m "quiting for the night. sure hope that II have untill midnight tomorrow or i'm screwed. might be screwed anyway."[Aadd *[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C++ -std=c++11  semiCritical.cpp
+]0;jim@jim-TMM: ~/Desktop/github/CSCI375-SM18/project2[01;32mjim@jim-TMM[00m:[01;34m~/Desktop/github/CSCI375-SM18/project2[00m$ ./a.out
+reader case 0: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+writer case 3: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 2: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 2: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+writer case 3: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+writer case 4: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+writer case 3: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+writer case 4: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+reader case 0: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 0: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 1: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+reader case 0: entering critical section
+2 reader processes in the critical section
+1 writer process in the critical section.
+writer case 3: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+writer case 3: entering critical section
+1 reader processes in the critical section
+0 writer processes in the critical section
+]0;jim@jim-TMM: ~/Desktop/github/CSCI375-SM18/project2[01;32mjim@jim-TMM[00m:[01;34m~/Desktop/github/CSCI375-SM18/project2[00m$ end
+No command 'end' found, did you mean:
+ Command 'ed' from package 'ed' (main)
+ Command 'and' from package 'and' (universe)
+ Command 'nd' from package 'nd' (universe)
+ Command 'bnd' from package 'bnd' (universe)
+ Command 'ent' from package 'ent' (universe)
+ Command 'esd' from package 'pulseaudio-esound-compat' (universe)
+ Command 'snd' from package 'snd-nox' (universe)
+ Command 'snd' from package 'snd-gtk-pulse' (universe)
+ Command 'snd' from package 'snd-gtk-jack' (universe)
+ Command 'env' from package 'coreutils' (main)
+ Command 'send' from package 'nmh' (universe)
+ Command 'send' from package 'mailutils-mh' (universe)
+ Command 'eid' from package 'id-utils' (universe)
+end: command not found
+]0;jim@jim-TMM: ~/Desktop/github/CSCI375-SM18/project2[01;32mjim@jim-TMM[00m:[01;34m~/Desktop/github/CSCI375-SM18/project2[00m$ exit
+exit
+
+Script done on Tue 10 Jul 2018 11:20:26 PM EDT
